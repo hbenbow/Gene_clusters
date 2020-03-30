@@ -61,7 +61,7 @@ clusters<-function(all, expression_scores, threshold){
     if(length(density_together) >=1){
       density_together$Hotspot <- "Hotspot"
       hotspots_together[[length(hotspots_together)+1]]<-density_together
-      write.csv(density_together, paste("Gene_cluster_analysis/density", d, ".csv", sep=""))
+      write.csv(density_together, paste("Gene_cluster_analysis/", "density", d, ".csv", sep=""))
       df<-merge(df, density_together, all.x=T)
       df[is.na(df)]<-"Not hotspot"
       stress_together[[length(stress_together)+1]] = df
@@ -94,7 +94,7 @@ clusters<-function(all, expression_scores, threshold){
   # ====================================================================================================
   for(i in unique(all_stress_together$Chromosome)){
     data<-all_stress_together[(all_stress_together$Chromosome==i),]
-    write.csv(data, file=paste(i, ".csv", sep=""), row.names=F)
+    write.csv(data, file=paste("Gene_cluster_analysis/", i, ".csv", sep=""), row.names=F)
     plot<-
       ggplot(data, aes(x=end, y=density)) +geom_jitter(size=1.6, aes(colour=Hotspot), alpha=0.6) +facet_grid(Stress~.) + xlab("Position (bp)") + 
       ylab("Gene Density") + ggtitle(paste(i)) + theme_bw() +
