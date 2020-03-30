@@ -78,8 +78,8 @@ clusters<-function(all, expression_scores, threshold){
       theme(text = element_text(size=16, colour="black")) + 
       coord_cartesian(ylim=c(0,1))+
       scale_color_manual( values=c("grey60", "orangered2"))
-    write.csv(df, file=paste(d, "Gene_cluster_analysis/analysed.csv", sep="_"), row.names=F)
-    ggsave(plot, file=paste("Gene_cluster_analysis/",d, ".pdf"), width=300, height=300, unit="mm", dpi=400)
+    write.csv(df, file=paste("Gene_cluster_analysis/", d, "analysed.csv", sep="_"), row.names=F)
+    ggsave(plot, file=paste("Gene_cluster_analysis/", d, ".pdf"), width=300, height=300, unit="mm", dpi=400)
     
   }
   
