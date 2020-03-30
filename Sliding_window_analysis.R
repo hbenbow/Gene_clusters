@@ -11,9 +11,9 @@ threshold=0.7
 # This section reads in the files
 # which directory for the merged data
 setwd(".")
-all <- read.csv("wheat_all.csv", header=T)
+all <- read.csv("../../wheat_all.csv", header=T)
 colnames(all)<-c( "Chromosome", "start", "end", "GeneID","Score", "strand")
-expression_scores<-read.csv("expression_scores.csv", header=T)
+expression_scores<-read.csv("../../expression_scores.csv", header=T)
 dir.create("Gene_cluster_analysis")
 
 clusters<-function(all, expression_scores, threshold){
