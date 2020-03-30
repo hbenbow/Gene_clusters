@@ -29,10 +29,10 @@ for(i in unique(final_hotspots$Hotspot)){
   exp_data$colors<-NULL
   exp_data$sum<-NULL
   exp_data$row<-NULL
-  # write.csv(exp_data, file=paste(i, "expression.csv"))
+  write.csv(exp_data, file=paste("Correlations/", i, "expression.csv"))
   exp_data<-as.matrix(t(exp_data))
   cor<-cor(exp_data)
-  # write.csv(cor, file=paste(i, "cor.csv"))
+  write.csv(cor, file=paste("Correlations/", i, "cor.csv"))
   setwd("Correlations")
   pdf(paste(i, ".pdf"))
   heatmap.2(cor, margins=c(15,15), Rowv = NA, Colv = NA, symm=T, revC=F, RowSideColors=colors, ColSideColors = colors, dendrogram = "none", trace = "none", scale="none", col=my_palette)
