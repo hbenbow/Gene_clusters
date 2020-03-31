@@ -33,7 +33,7 @@ maps$Chromosome<-paste("chr", maps$Chromosome, sep="")
 all<-do.call(rbind.data.frame, all)
 all$Chromosome<-paste("chr", all$Chromosome, sep="")
 qtls<-do.call(rbind.data.frame, qtl_list)
-
+qtls$Chromosome<-paste("chr", qtls$Chromosome, sep="")
 
 dir.create("~/Documents/Hotspots/Paper_version_4/QTLs")
 setwd("~/Documents/Hotspots/Paper_version_4/QTLs")
@@ -77,7 +77,7 @@ for(i in 1:nrow(qtls)){
 QTL.positions<-do.call(rbind.data.frame, qtls_list)
 
 
-ggplot(final, aes(x=end.x, y=Density)) +geom_jitter(size=1.6, aes(colour=Hotspot.x), alpha=0.6) + xlab("Position (bp)") + 
+ggplot(final, aes(x=end.x, y=Density.x)) +geom_jitter(size=1.6, aes(colour=Hotspot.x), alpha=0.6) + xlab("Position (bp)") + 
   ylab("Gene Density")  + theme_bw() + 
   geom_hline(yintercept=0.7, alpha=0.7) +
   theme(text = element_text(size=16, colour="black")) + 
