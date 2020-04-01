@@ -1,3 +1,5 @@
+library(grid)
+library(gridExtra)
 setwd("~/Documents/Hotspots/Paper_version_4/Markers/Meta_qtl_maps/")
 chroms<-dir(pattern="map")
 chromosome<-substr(chroms, 1, 2)
@@ -38,6 +40,7 @@ qtls$Chromosome<-paste("chr", qtls$Chromosome, sep="")
 dir.create("~/Documents/Hotspots/Paper_version_4/QTLs")
 setwd("~/Documents/Hotspots/Paper_version_4/QTLs")
 
+physical_maps<-list()
 qtls_list<-list()
 for(i in 1:nrow(qtls)){
   data<-qtls[i,]
@@ -58,6 +61,7 @@ for(i in 1:nrow(qtls)){
     phys_map<-coords[,c(4, 3, 7, 8, 1, 5)]
     phys_map$cM<-paste(data$QTL)
     phys_map<-phys_map[,c(2, 1, 3, 4, 5, 6)]
+    physical_maps[[length(physical_maps)+1]]<-phys_map
     newmin<-min(phys_map$Start)
     newmax<-max(phys_map$End)
     lod<-phys_map$LOD
@@ -81,6 +85,7 @@ for(i in 1:nrow(qtls)){
   }
 }
 
+QTL.physical.maps<-do.call(rbind.data.frame, physical_maps)
 QTL.positions<-do.call(rbind.data.frame, qtls_list)
 for(i in paste(unique(QTL.positions$Chromosome.x))){
   data<-QTL.positions[(QTL.positions$Chromosome.x==i),]
@@ -90,55 +95,55 @@ for(i in paste(unique(QTL.positions$Chromosome.x))){
 }
 
 write.csv(QTL.positions, file="All_QTL_and_Hotspots.csv")
+
+
+physical_map<-merge(maps, all_markers_positions, by="Marker")
+physical_map<-as.data.frame(cbind(physical_map, ifelse(physical_map$Chromosome.x==physical_map$Chromosome.y,1,0)))
+physical_map<-physical_map[(physical_map$`ifelse(physical_map$Chromosome.x == physical_map$Chromosome.y, `==1),]
+physical_map<-physical_map[!(duplicated(physical_map$Marker)),]
+
+ggplot(physical_map, aes(x=cM, y=Start)) + geom_point()+
+  facet_wrap(~Chromosome.x, ncol=3) +
+  theme(text = element_text(size=20, colour="black")) + 
+ theme_bw()
+
+ggplot(Fg_final[!(Fg_final$Chromosome=="chrUn"),], 
+       aes(x=end, y=density, group=Colour)) +geom_jitter(size=1.6, aes(colour=Colour),alpha=0.6) + 
+  facet_wrap(~Chromosome, ncol=3) + xlab("Position (bp)") + 
+  ylab("Gene Density") + theme_bw() +
+  geom_hline(yintercept=0.7, alpha=0.7) +
+  theme(text = element_text(size=16, colour="black")) + 
+  coord_cartesian(ylim=c(0,1))+
+  scale_color_manual( values=c("grey60", "orangered2"), labels=c("No cluster", "Cluster"))
+
+ggplot(physical_qtls, aes(x=End.x, y=LOD)) +geom_line() + 
+  facet_wrap(~Chromosome.x.x, ncol=3) + xlab("Position (bp)") 
+  ylab("Gene Density") + theme_bw() +
+  geom_hline(yintercept=0.7, alpha=0.7) +
+  theme(text = element_text(size=16, colour="black")) + 
+  coord_cartesian(ylim=c(0,1))+
+  scale_color_manual( values=c("grey60", "orangered2"), labels=c("No cluster", "Cluster"))
+
+for(i in unique(physical_qtls$Chromosome.x.x)){
+  q<-physical_qtls[(physical_qtls$Chromosome.x.x==i),]
+  c<-Fg_final[(Fg_final$Chromosome==i),]
   
-  ggplot(final, aes(x=end.x, y=Density.x)) +geom_jitter(size=1.6, aes(colour=Hotspot.x), alpha=0.6) + xlab("Position (bp)") + 
-    ylab("Gene Density")  + theme_bw() + 
-    geom_hline(yintercept=0.7, alpha=0.7) +
-    theme(text = element_text(size=16, colour="black")) + 
-    coord_cartesian(ylim=c(0,1))
-  scale_color_manual( values=c("grey60", "orangered2"))
-  
-  
-  for(i in unique(final_hotspots$Hotspot)){
-    data<-final_hotspots[final_hotspots$Hotspot== i,]
-    data<-data[,c(1, 3, 4, 5, 6, 7, 8, 2)]
-    min<-min(data$start)
-    max<-max(data$end)
-    chromosome<-unique(data$Chromosome)
-    qtl_data<-QTL_bed[(QTL_bed$Chromosome==chromosome),]
-    qtl_data<-qtl_data[(qtl_data$start >= min),]
-    qtl_data<-qtl_data[(qtl_data$end <= max),]
-    qtl_data<-qtl_data[,c(1, 2, 3, 4, 5, 6, 7, 9)]
-    colnames(qtl_data)<-colnames(data)
-    hotspot<-rbind(data, qtl_data)
-    hotspot<-hotspot[order(hotspot$start),]
-    chromosome<-unique(qtl_data$Chromosome)
-    qtl<-paste(qtl_data$Fg.response)
-    if(length(qtl) > 0){
-      all_qtl_info<-qtls[(qtls$Chromosome==chromosome),]
-      all_qtl_info<-all_qtl_info[(all_qtl_info$QTL==qtl),]
-      write.csv(hotspot, file=paste(i, "hotspot.csv", sep=""), row.names=F)
-      write.csv(all_qtl_info, file=paste(chromosome, "hotspot.csv", sep=""), row.names=F)
-    }
-    # ggplot(data, aes(x=end, y=Density)) +geom_jitter(size=1.6, alpha=0.6) + xlab("Position (bp)") + 
-    #   ylab("Gene Density") + ggtitle(paste(chromosome, qtl)) + theme_bw() + 
-    #   geom_hline(yintercept=0.7, alpha=0.7) +
-    #   geom_vline(xintercept=qtl_data$start) +
-    #   theme(text = element_text(size=16, colour="black")) + 
-    #   coord_cartesian(ylim=c(0,1))+
-    #   scale_color_manual( values=c("grey60", "orangered2"))
-    # ggsave(file=paste(chromosome, qtl, '.pdf', sep=""))
-  }
-  
-  genes<-list()
-  for(i in 1:nrow(all_markers)){
-    data<-all_markers[i,]
-    marker<-data[,1]
-    sequence<-as.character(data[,2])
-    marker<-paste(">", marker, sep="")
-    gene<-rbind(marker, sequence)
-    genes[[length(genes)+1]] = gene
-  }
-  all_SSRs<-do.call(rbind.data.frame, genes)
-  
-  
+qtl_plot<-ggplot(q, aes(x=End.x, y=LOD)) +geom_jitter(size=1.6, alpha=0.6) + xlab("Position (bp)") + 
+  ylab("LOD Score")  + theme_bw() + 
+  geom_hline(aes(yintercept=3))+
+  theme(text = element_text(size=16, colour="black"))
+
+cluster_plot<-ggplot(c, aes(x=end, y=density)) +geom_jitter(size=1.6, alpha=0.6, aes(colour=Colour)) + xlab("Position (bp)") + 
+    ylab("Density")  + theme_bw() + 
+    geom_hline(aes(yintercept=0.7))+
+  theme(text = element_text(size=16, colour="black"), legend.position = "none")+
+  coord_cartesian(ylim=c(0,1))+
+  scale_color_manual( values=c("grey60", "orangered2"), labels=c("No cluster", "Cluster"))
+
+gq <- ggplotGrob(qtl_plot)
+gc <- ggplotGrob(cluster_plot)
+
+pdf(file=paste(i, ".pdf", sep=""))
+plot(gtable_rbind(gq, gc))
+dev.off()
+}
