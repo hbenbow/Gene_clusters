@@ -1,6 +1,8 @@
 library(gplots)
 library(tidyr)
 library(Hmisc)
+library(corrplot)
+
 my_palette <- colorRampPalette(c("red", "grey", "green"))(n = 50)
 final_hotspots <- read.csv("~/Documents/Hotspots/Paper_version_4/final_hotspots.csv")
 Fg_final <- read.csv("~/Documents/Hotspots/Paper_version_4/Fg_final.csv")
@@ -40,6 +42,10 @@ for(i in unique(final_hotspots$Hotspot)){
   pdf(paste(i, ".pdf"))
   heatmap.2(cor$r, margins=c(15,15), Rowv = NA, Colv = NA, symm=T, revC=F, RowSideColors=colors, ColSideColors = colors, dendrogram = "none", trace = "none", scale="none", col=my_palette)
   dev.off()
+  pdf(paste(i, "corr_plot.pdf"))
+  corrplot(cor$r, type="lower", order="original",p.mat = cor$P, 
+          sig.level = 0.05, insig = "blank", tl.col="black", tl.srt=45, tl.cex = .7)
+   dev.off()   
 }
   
 # do we want to change the size of the flanking region?
