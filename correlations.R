@@ -1,10 +1,13 @@
 library(gplots)
 library(tidyr)
+library(Hmisc)
 my_palette <- colorRampPalette(c("red", "grey", "green"))(n = 50)
 final_hotspots <- read.csv("~/Documents/Hotspots/Paper_version_4/final_hotspots.csv")
 Fg_final <- read.csv("~/Documents/Hotspots/Paper_version_4/Fg_final.csv")
 ERP013829_tpm <- read.delim("~/Documents/Hotspots/Paper_version_4/ERP013829_tpm.tsv")
-dir.create("Correlations")
+dir.create("Correlations_FR_only")
+setwd("Correlations_FR_only")
+
 for(i in unique(final_hotspots$Hotspot)){
   data<-final_hotspots[final_hotspots$Hotspot== i,]
   peak<-round(nrow(data)/2)
@@ -29,15 +32,14 @@ for(i in unique(final_hotspots$Hotspot)){
   exp_data$colors<-NULL
   exp_data$sum<-NULL
   exp_data$row<-NULL
-  write.csv(exp_data, file=paste("Correlations/", i, "expression.csv"))
+  write.csv(exp_data, file=paste(i, "expression.csv"))
   exp_data<-as.matrix(t(exp_data))
-  cor<-cor(exp_data)
-  write.csv(cor, file=paste("Correlations/", i, "cor.csv"))
-  setwd("Correlations")
+  cor<-rcorr(exp_data)
+  write.csv(cor$r, file=paste(i, "Rcor.csv"))
+  write.csv(cor$P, file=paste(i, "Pcor.csv"))
   pdf(paste(i, ".pdf"))
-  heatmap.2(cor, margins=c(15,15), Rowv = NA, Colv = NA, symm=T, revC=F, RowSideColors=colors, ColSideColors = colors, dendrogram = "none", trace = "none", scale="none", col=my_palette)
+  heatmap.2(cor$r, margins=c(15,15), Rowv = NA, Colv = NA, symm=T, revC=F, RowSideColors=colors, ColSideColors = colors, dendrogram = "none", trace = "none", scale="none", col=my_palette)
   dev.off()
-  setwd("../")
 }
   
 # do we want to change the size of the flanking region?
@@ -48,6 +50,7 @@ stats<-list()
 for(i in unique(final_hotspots$Hotspot)){
   # calculate correlation of hotspot only
   data<-final_hotspots[final_hotspots$Hotspot== i,]
+  data<-data[(data$Fg.response==1),]
   hotspot_genes<-as.character(data$GeneID)
   exp_data<-subset(ERP013829_tpm, ERP013829_tpm$gene %in% hotspot_genes)
   row.names(exp_data)<-exp_data$gene
@@ -56,7 +59,7 @@ for(i in unique(final_hotspots$Hotspot)){
   exp_data<-exp_data[!(exp_data$sum==0),]
   exp_data$sum<-NULL
   exp_data<-as.matrix(t(exp_data))
-  cor<-cor(exp_data)
+  cor<-rcorr(exp_data)
   cor_hotspot<-cor
   # calculate correlation of flank regions
   f1<-as.character(data$GeneID[1])
@@ -75,12 +78,12 @@ for(i in unique(final_hotspots$Hotspot)){
   flank_exp_data<-flank_exp_data[!(flank_exp_data$sum==0),]
   flank_exp_data$sum<-NULL
   flank_exp_data<-as.matrix(t(flank_exp_data))
-  cor<-cor(flank_exp_data)
+  cor<-rcorr(flank_exp_data)
   cor_flank<-cor
   # convert correlations into long format
-  cor_hotspot_long<-gather(as.data.frame(cor_hotspot), key="gene", value ="Cc")
+  cor_hotspot_long<-gather(as.data.frame(cor_hotspot$r), key="gene", value ="Cc")
   cor_hotspot_long$Data<-"Hotspot"
-  cor_flank_long<-gather(as.data.frame(cor_flank), key="gene", value ="Cc")
+  cor_flank_long<-gather(as.data.frame(cor_flank$r), key="gene", value ="Cc")
   cor_flank_long$Data<-"Flank"
   all_cor<-rbind(cor_flank_long, cor_hotspot_long)
   all_cor$absolute<-abs(all_cor$Cc)
@@ -93,7 +96,7 @@ for(i in unique(final_hotspots$Hotspot)){
   agg$SE<-agg$sd/sqrt(agg$n)
   agg$hotspot<-paste(i)
   stats[[length(stats) + 1]] <-  agg
-  write.csv(all_cor, file=paste("Correlations/", i, "hotspot_cc.csv"))
+  write.csv(all_cor, file=paste(i, "hotspot_cc.csv"))
   # calculate statistics
   # check for normality
   all_cor$Data<-as.factor(all_cor$Data)
@@ -114,12 +117,12 @@ for(i in unique(final_hotspots$Hotspot)){
     xlab("Data set") + 
     ylab("Absolute correlation coefficient") + 
     theme(text =  element_text(size=15))
-  ggsave(plot, filename = paste("Correlations/", i, "boxplot.pdf"))
+  ggsave(plot, filename = paste(i, "boxplot.pdf"))
 }
 
 kruskall_test <- do.call("rbind", kruskall)
-write.csv(kruskall_test, file="Correlations/kruskall-wallis.csv")
+write.csv(kruskall_test, file="kruskall-wallis.csv")
 shapiro_test <- do.call("rbind", shapiro)
-write.csv(shapiro_test, "Correlations/shapiro.csv")
+write.csv(shapiro_test, "shapiro.csv")
 stats<-do.call("rbind", stats)
-write.csv(stats, "Correlations/Stats.csv")
+write.csv(stats, "Stats.csv")
