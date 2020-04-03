@@ -7,14 +7,16 @@ library(tidyr)
 # Read in gene coordinate file, containing Chromosome name, gene start posiiton, gene end
 # position, gene id, and strand. Do not need strand.
 
-all <- read.csv("wheat_all.csv", header=T)
+all <- read.csv("../wheat_all.csv", header=T)
 colnames(all)<-c( "Chromosome", "start", "end", "GeneID", "Score", "strand")
 # Read in expression scores. This is a .csv file in which each row is a gene
 # an d order must correspond to the order in the gene coordinate file. Each column after 
 # the gene column is 
-expression_scores<-read.csv("expression_scores.csv", header=T)
+expression_scores<-read.csv("../expression_scores.csv", header=T)
+
+
 diseases<-colnames(expression_scores)[-1]
-permutations=2
+permutations=1000
 dir.create("Permutations")
 # this section reads in all files and does the window analysis
 # test

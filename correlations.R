@@ -44,7 +44,7 @@ for(i in unique(final_hotspots$Hotspot)){
   dev.off()
   pdf(paste(i, "corr_plot.pdf"))
   corrplot(cor$r, type="lower", order="original",p.mat = cor$P, 
-          sig.level = 0.05, insig = "blank", tl.col="black", tl.srt=45, tl.cex = .7)
+          sig.level = 0.05, insig = "blank", tl.col="black", tl.cex = 0.7, tl.srt = 45)
    dev.off()   
 }
   
@@ -132,3 +132,4 @@ shapiro_test <- do.call("rbind", shapiro)
 write.csv(shapiro_test, "shapiro.csv")
 stats<-do.call("rbind", stats)
 write.csv(stats, "Stats.csv")
+

@@ -1,6 +1,10 @@
 library(grid)
 library(gridExtra)
 setwd("~/Documents/Hotspots/Paper_version_4/Markers/Meta_qtl_maps/")
+Fg_final <- read.csv("~/Documents/Hotspots/Paper_version_4/Fg_final.csv")
+all_markers_positions <- read.csv("~/Documents/Hotspots/Paper_version_4/all_markers_positions.csv", row.names=1)
+final_hotspots <- read.csv("~/Documents/Hotspots/Paper_version_4/final_hotspots.csv")
+
 chroms<-dir(pattern="map")
 chromosome<-substr(chroms, 1, 2)
 
@@ -96,11 +100,12 @@ for(i in paste(unique(QTL.positions$Chromosome.x))){
 
 write.csv(QTL.positions, file="All_QTL_and_Hotspots.csv")
 
-
+colnames(all_markers_positions)<-c("Chromosome", "Start", "End", "Marker", "Platform")
 physical_map<-merge(maps, all_markers_positions, by="Marker")
 physical_map<-as.data.frame(cbind(physical_map, ifelse(physical_map$Chromosome.x==physical_map$Chromosome.y,1,0)))
 physical_map<-physical_map[(physical_map$`ifelse(physical_map$Chromosome.x == physical_map$Chromosome.y, `==1),]
 physical_map<-physical_map[!(duplicated(physical_map$Marker)),]
+
 
 ggplot(physical_map, aes(x=cM, y=Start)) + geom_point()+
   facet_wrap(~Chromosome.x, ncol=3) +
