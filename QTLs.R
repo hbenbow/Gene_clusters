@@ -16,7 +16,7 @@ for(i in chromosome){
   colnames(map)<-c("order", "Marker", "cM")
   map$Chromosome<-paste(i)
   maps[[length(maps)+1]] = map
-  qtl<-read.delim(paste(i, "_QTL.txt.qtl", sep=""), header=F)
+  qtl<-read.delim(paste(i, "_QTL.txt", sep=""), header=F, na.strings = "na")
   colnames(qtl)<-c("QTL", "Resistance", "Ontology", "Place", "Year", "Chromosome" ,"Linkage_group", "LOD", "r2", "Peak", "cM_Start", "cM_end")
   qtl_list[[length(qtl_list)+1]]= qtl
   qtls<-unique(qtl$QTL)
@@ -46,6 +46,7 @@ setwd("~/Documents/Hotspots/Paper_version_4/QTLs")
 
 physical_maps<-list()
 qtls_list<-list()
+info<-list()
 for(i in 1:nrow(qtls)){
   data<-qtls[i,]
   qtlid<-data$QTL
@@ -58,7 +59,7 @@ for(i in 1:nrow(qtls)){
   data2<-data2[(data2$cM >=min),]
   data2<-data2[(data2$cM <= max),]
   data2$LOD<-lod
-  coords<-merge(data2, all_markers_positions, by.x="Marker", by.y="Feature")
+  coords<-merge(data2, all_markers_positions, by="Marker")
   coords<-as.data.frame(cbind(coords, ifelse(coords$Chromosome.x==coords$Chromosome.y,1,0)))
   coords<-coords[(coords$`ifelse(coords$Chromosome.x == coords$Chromosome.y, 1, 0)` == 1),]
   if(nrow(coords)>0){
@@ -80,6 +81,8 @@ for(i in 1:nrow(qtls)){
     final<-merge(final, final_hotspots, by="GeneID", all.x=T, fill=1)
     final$Density.y[is.na(final$Density)] <- 0
     final<-final[order(final$start.x),]
+    info2<-cbind(paste(unique(data$QTL)), paste(unique(data$Chromosome)), min(phys_map$start), max(phys_map$end))
+    info[[length(info)+1]]<-info2
     if(length(paste(unique(is.na(final$Density.y))))>1){
       final<-final[,1:6]
       write.csv(final, file=paste(qtlid, chromosome, ".csv", sep="_"))
@@ -89,6 +92,7 @@ for(i in 1:nrow(qtls)){
   }
 }
 
+tables<-do.call(rbind.data.frame, info)
 QTL.physical.maps<-do.call(rbind.data.frame, physical_maps)
 QTL.positions<-do.call(rbind.data.frame, qtls_list)
 for(i in paste(unique(QTL.positions$Chromosome.x))){
@@ -152,3 +156,17 @@ pdf(file=paste(i, ".pdf", sep=""))
 plot(gtable_rbind(gq, gc))
 dev.off()
 }
+
+
+  ggplot(D4, aes(x=end, y=density)) + 
+    geom_jitter(aes(colour=as.factor(Disease)),size=6) + 
+    geom_vline(aes(xintercept=12773158)) + geom_vline(aes(xintercept=13745379)) + 
+    geom_vline(aes(xintercept=14925594)) +
+    theme_bw()+
+    theme(text = element_text(size=16, colour="black"), legend.position = "none") +
+    scale_color_manual( values=c("grey60", "orangered2"), labels=c("No cluster", "Cluster"))+
+    xlab("Position (bp)") +
+    ylab("FHB-responsive gene density")
+  
+    
+  
