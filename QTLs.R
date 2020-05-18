@@ -1,3 +1,10 @@
+# This script was used to identify clusters within QTLs using the consensus map
+# of venske etc al 2019. It cuts the genomic interval between the left and right 
+# flanking markers of a QTL and identifies clusters within the interval.
+# due to potential errors in the consesnsus map, we used the original qtl database from 
+# the systematic review of venske 2019, and identified clusters that were near to the linked marker of 
+# each QTL. That script is called "near2QTLs".
+
 library(grid)
 library(gridExtra)
 setwd("~/Documents/Hotspots/Paper_version_4/Markers/Meta_qtl_maps/")
