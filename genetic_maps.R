@@ -24,7 +24,7 @@ DarT<-do.call(rbind.data.frame, chroms)
 
 
 chroms<-list()
-for(bed in list.files(path="SSR/gff/", patter="gff3")){
+for(bed in list.files(path="SSR/gff/", pattern="gff3")){
   file<-read.delim(paste("SSR/gff/", bed, sep=""), header=F, comment.char = "#")
   names<-as.character(file$V9)
   split<-do.call('rbind',strsplit(names, split=";"))[,3]
@@ -39,7 +39,23 @@ for(bed in list.files(path="SSR/gff/", patter="gff3")){
 }
 SSRs<-do.call(rbind.data.frame, chroms)
 
-markers<-rbind(iselect, DarT, SSRs)
+chroms<-list()
+for(bed in list.files(path="SSR/", pattern="bed")){
+  file<-read.delim(paste("SSR/", bed, sep=""), header=F, skip=1)
+  chromosome=substr(bed, 14, 15)
+  file<-file[,1:4]
+  colnames(file)<-c("Chromosome", "Start", "End", "Feature")
+  file1<-file
+  file1$Feature<-paste("X", tolower(file1$Feature), sep="")
+  file2<-rbind(file, file1)
+  file2$Platform<-"SSR"
+  chroms[[length(chroms)+1]]<-file2
+}
+barc<-do.call(rbind.data.frame, chroms)
+
+
+
+markers<-rbind(iselect, DarT, SSRs, barc)
 write.csv(markers, file="~/Documents/Hotspots/Paper_version_4/all_markers_positions.csv")
 write.csv(maps, file="~/Documents/Hotspots/Paper_version_4/maps.csv")
 
