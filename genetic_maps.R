@@ -22,6 +22,16 @@ for(bed in list.files(path="DArT/")){
 }
 DarT<-do.call(rbind.data.frame, chroms)
 
+chroms<-list()
+for(bed in list.files(path="Infinium/")){
+  file<-read.delim(paste("Infinium/", bed, sep=""), header=F, skip=1)
+  chromosome=substr(bed, 14, 15)
+  file<-file[,1:4]
+  colnames(file)<-c("Chromosome", "Start", "End", "Feature")
+  file$Platform<-"infinium"
+  chroms[[length(chroms)+1]]<-file
+}
+infinium<-do.call(rbind.data.frame, chroms)
 
 chroms<-list()
 for(bed in list.files(path="SSR/gff/", pattern="gff3")){
@@ -55,7 +65,7 @@ barc<-do.call(rbind.data.frame, chroms)
 
 
 
-markers<-rbind(iselect, DarT, SSRs, barc)
+markers<-rbind(iselect, DarT, SSRs, barc, infinium)
 write.csv(markers, file="~/Documents/Hotspots/Paper_version_4/all_markers_positions.csv")
 write.csv(maps, file="~/Documents/Hotspots/Paper_version_4/maps.csv")
 

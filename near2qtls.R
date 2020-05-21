@@ -12,6 +12,7 @@ number<-unique(subset
                  all_markers_positions$Feature %in% QTL_database$Linked.markers))
 table(number$Platform)
 
+mismatch<-list()
 all_qtls<-list()
 qtls<-QTL_database$General.number
 for(qtl in qtls){
@@ -26,14 +27,40 @@ for(qtl in qtls){
   if(lenp>0 && len>0){
     clusters$qtl<-paste(qtl)
     clusters$marker<-paste(unique((position$Feature)))
-    clusters$marker_position<-as.numeric(paste(unique(position$Start)))
-    clusters$difference<-abs(clusters$start-clusters$marker_position)/1000000
-    all_qtls[[length(all_qtls)+1]]<-clusters
+    start<-unique(position$Start)
+    length2<-cbind(position$Feature, length(start))
+    mismatch[[length(mismatch)+1]]<-length2
+    # clusters$marker_position<-as.numeric(paste(start))
+    # clusters$difference<-abs(clusters$start-clusters$marker_position)/1000000
+    # all_qtls[[length(all_qtls)+1]]<-clusters
   }else{}
 } 
 
+qtls_clusters<-do.call(rbind.data.frame, mismatch)
 
-qtls_clusters<-do.call(rbind.data.frame, all_qtls)
+
+
+# check how many qtl markers are present in the marker database file, and check location of them
+ av<-subset(all_markers_positions, all_markers_positions$Feature %in% marker)
+}
+
+list<-list()
+qtl_indb<-subset(all_markers_positions, all_markers_positions$Feature %in% QTL_database$Linked.markers)
+for(marker in qtl_indb$Feature){
+  data<-qtl_indb[(qtl_indb$Feature==marker),]
+  table<-spread(as.data.frame(table(data[,c(1,2)])), key=Start, value=Freq)
+  row.names(table)<-table$Chromosome
+  table$Chromosome<-NULL
+  table<-as.matrix(table)
+  table[table>0]<-1
+  table<-as.data.frame(table)
+  table$sum<-rowSums(table)
+  table$marker<-paste(marker)
+  test<-table[(table$sum>1),]
+  list[[length(list)+1]]<-test$marker}
+mismatches<-do.call(rbind.data.frame, list)
+mismatches<-as.data.frame(unique(mismatches$c..wPt.9857....wPt.0902....wPt.9857....wPt.9857....wPt.9857...))
+
 
 for(i in qtls_clusters$Hotspot){
   data<-qtls_clusters[(qtls_clusters$Hotspot==i),]
