@@ -1,0 +1,44 @@
+---
+title: "QTLs associated with *Fusarium* responsive gene clusters in wheat"
+author: "Harriet R. Benbow"
+date: "22/05/2020"
+output: bookdown::word_document2
+fig_caption: yes
+---
+
+<!-- this md is associated with data in  /Users/harrietbenbow/Documents/Hotspots/Paper_version_4/ -->
+
+\newpage
+# Finding markers
+
+For every QTL in the systematic review of Venske et al., (2019), we attempted to find chromosome coordinates for the markers that were linked to the QTLs.
+
+By downloading .bed or .gff3 files of all tracks from wheat JBrowse, we accessed positional information for wheat SNP, DArT, and SSR markers.  
+As this left some QTL markers missing, we manually identified positional information for the remaining markers, where possible, by accessing their probe or primer sequence from GrainGenes, and BLASTn searching this sequence to the IWGSC wheat V2 reference genome. 
+For the BLASTn searches, the SSR marker sequences were searched using the BLASTn-short algorithm for short sequences. The command was as follows:  
+
+>blastn -db ~/IWGSCV1. 1/v2/iwgsc_refseqv2.0_all_chromosomes.fa -query ssrs_combined.fasta  -outfmt 6 -out ./ssrs.blast  -task blastn-short-max_target_seqs 5 -max_hsps 1
+
+For the DArT, Inifinium, iSelect and GBS markers, the normal BLASTn algorithm was used and the command was:  
+
+>blastn -db ~/IWGSCV1.1/v2/iwgsc_refseqv2.0_all_chromosomes.fa -query misc.fasta  -outfmt 6 -out ./misc.blast  -max_target_seqs 5 -max_hsps 1  
+
+In both search strategies, the parameters -max_target_seqs 5 and -max_hsps 1 were used, commanding the return of 5 individual hits per query sequence, but only 1 hit per target, with the aim of identifying the top hit for each marker per chromosome. 
+
+Once the positional information of these markers was integrated to our database, we were left with x unique wheat markers (some of which are unique in name, but not in position, i.e. they may be duplicated across genotyping platforms).
+
+ (Table \@ref(tab:tab1)).
+
+```{r tab1, echo = FALSE, results="asis", eval="hide"}
+library(knitr)
+library(tidyr)
+library(plyr)
+library(dplyr)
+setwd("~/Documents/Hotspots/Paper_version_4/QTLs/")
+all_markers_positions <- read.csv("~/Documents/Hotspots/Paper_version_4/all_markers_positions.csv", row.names=1)
+markers<-unique(all_markers_positions$Feature)
+unique<-subset(all_markers_positions, all_markers_positions$Feature %in% markers)
+table<-spread(as.data.frame(table(unique$Platform)), key=Var1, value=Freq)
+
+kable(table, caption="Number of markers per platform", row.names=NA, "pandoc", align="rl")
+```
