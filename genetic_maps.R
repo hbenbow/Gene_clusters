@@ -28,7 +28,7 @@ for(bed in list.files(path="Infinium/")){
   chromosome=substr(bed, 14, 15)
   file<-file[,1:4]
   colnames(file)<-c("Chromosome", "Start", "End", "Feature")
-  file$Platform<-"infinium"
+  file$Platform<-"Infinium"
   chroms[[length(chroms)+1]]<-file
 }
 infinium<-do.call(rbind.data.frame, chroms)
@@ -45,7 +45,10 @@ for(bed in list.files(path="SSR/gff/", pattern="gff3")){
   file3<-file2
   file3$Feature<-paste("X", tolower(file3$Feature), sep="")
   file4<-rbind(file2, file3)
-  chroms[[length(chroms)+1]]<-file4
+  file5<-file4
+  file5$Feature <- gsub('wms', 'gwm', file5$Feature)
+  file6<-rbind(file4, file5)
+  chroms[[length(chroms)+1]]<-file6
 }
 SSRs<-do.call(rbind.data.frame, chroms)
 

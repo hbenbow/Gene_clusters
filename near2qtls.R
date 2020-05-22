@@ -41,9 +41,10 @@ qtls_clusters<-do.call(rbind.data.frame, mismatch)
 
 
 # check how many qtl markers are present in the marker database file, and check location of them
- av<-subset(all_markers_positions, all_markers_positions$Feature %in% marker)
-}
+ qtl_indb<-subset(all_markers_positions, all_markers_positions$Feature %in% QTL_database$Linked.markers)
 
+
+ # this chunk will identify markers that have multiple hits on the same chromosome
 list<-list()
 qtl_indb<-subset(all_markers_positions, all_markers_positions$Feature %in% QTL_database$Linked.markers)
 for(marker in qtl_indb$Feature){
@@ -58,6 +59,7 @@ for(marker in qtl_indb$Feature){
   table$marker<-paste(marker)
   test<-table[(table$sum>1),]
   list[[length(list)+1]]<-test$marker}
+
 mismatches<-do.call(rbind.data.frame, list)
 mismatches<-as.data.frame(unique(mismatches$c..wPt.9857....wPt.0902....wPt.9857....wPt.9857....wPt.9857...))
 
