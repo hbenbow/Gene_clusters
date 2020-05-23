@@ -66,9 +66,34 @@ for(bed in list.files(path="SSR/", pattern="bed")){
 }
 barc<-do.call(rbind.data.frame, chroms)
 
+chroms<-list()
+for(bed in list.files(path="Blast/", pattern=".blast")){
+  file<-read.delim(paste("Blast/", bed, sep=""), header=F, skip=1)
+  chromosome=substr(bed, 1, nchar(bed)-6)
+  file<-file[,c(2,9,10,1)]
+  colnames(file)<-c("Chromosome", "Start", "End", "Feature")
+  file1<-file
+  file1$Feature<-paste("X", tolower(file1$Feature), sep="")
+  file2<-rbind(file, file1)
+  file2$Platform<-paste(chromosome)
+  chroms[[length(chroms)+1]]<-file2
+  }
+blast<-do.call(rbind.data.frame, chroms)
+blast$Chromosome<-gsub("Chr", "chr", blast$Chromosome)
 
+chroms<-list()
+for(bed in list.files(path="Manual/")){
+  file<-read.delim(paste("Manual/", bed, sep=""), header=F, skip=1)
+  file<-file[,1:4]
+  colnames(file)<-c("Chromosome", "Start", "End", "Feature")
+  file1<-file
+  file1$Feature<-paste("X", tolower(file1$Feature), sep="")
+  file2<-rbind(file, file1)
+  file2$Platform<-paste("Manual")
+  chroms[[length(chroms)+1]]<-file2
+}
+manual<-do.call(rbind.data.frame, chroms)
 
-markers<-rbind(iselect, DarT, SSRs, barc, infinium)
+markers<-rbind(iselect, DarT, SSRs, barc, infinium, blast, manual)
 write.csv(markers, file="~/Documents/Hotspots/Paper_version_4/all_markers_positions.csv")
-write.csv(maps, file="~/Documents/Hotspots/Paper_version_4/maps.csv")
 

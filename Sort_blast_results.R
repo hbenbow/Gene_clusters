@@ -1,4 +1,5 @@
 library(dplyr)
+setwd("~/Documents/Hotspots/Paper_version_4/Marker_bed/Blast/")
 files <- dir(pattern =".blast")
 sets<-substr(files, 1, nchar(files)-6)
 wd<-getwd()
