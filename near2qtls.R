@@ -3,6 +3,8 @@ library(gridExtra)
 library(tidyr)
 library(dplyr)
 library(plyr)
+library(ggplot2)
+
 setwd("~/Documents/Hotspots/Paper_version_4/QTLs/")
 Fg_final <- read.csv("~/Documents/Hotspots/Paper_version_4/Fg_final.csv")
 all_markers_positions <- read.csv("~/Documents/Hotspots/Paper_version_4/all_markers_positions.csv", row.names=1)
@@ -36,6 +38,9 @@ mismatches<-do.call(rbind.data.frame, list)
 mismatches<-as.data.frame(unique(mismatches[,1]))
 mismatches<-subset(all_markers_positions, all_markers_positions$Feature %in% mismatches[,1])
 write.csv(mismatches, file="~/Documents/Hotspots/Paper_version_4/QTLs/mismatches.csv")
+
+# ========================================================================================================================================
+# this section makes a new file that has no mismatches (i.e. markers that have multipe hits on the same chromosome)
 
 all_markers_positions$ID<-paste(all_markers_positions$Chromosome, all_markers_positions$Start, all_markers_positions$Feature)
 no_dups<-all_markers_positions[!(duplicated(all_markers_positions$ID)),]
@@ -79,23 +84,43 @@ qtls_clusters$Difference<-abs(as.numeric(qtls_clusters$start) - as.numeric(qtls_
 
 
 # ====================================================================================================================
-# attempt at loop to draw a graph for every qtl/hotspot combo
-for(i in qtls_clusters$Hotspot){
-  data<-qtls_clusters[(qtls_clusters$Hotspot==i),]
-  min<-min(data$marker_position) - 100000
-  max<-max(data$marker_position) + 100000
-  chr<-as.character(data$Chromosome)
+# A histogram of distance between QTLs and FRGCs
+
+ggplot(qtls_clusters, aes(x=Difference)) + 
+  geom_histogram(binwidth=20, fill="grey60", colour="black") +
+  theme_classic()+
+  theme(text = element_text(size=20, colour="black"))
+
+# identify percentiles
+quantile(qtls_clusters$Difference, probs = c(0.01, 0.02, 0.05))
+
+# lets examine qtls that are <5 mbp from a FRGC
+
+threshold<-5
+data<-qtls_clusters[(qtls_clusters$Difference<=threshold),]
+write.csv(data, file="~/Documents/Hotspots/Paper_version_4/QTLs/qtls_lessthat_5mbp.csv")
+for(marker in data$marker){
+  newdata<-data[(data$marker==marker),]
+  min<-min(newdata$marker_position) - 5000000
+  max<-max(newdata$marker_position) + 5000000
+  chr<-as.character(unique(newdata$Chromosome))
   
+  df<-Fg_final[(Fg_final$Chromosome==chr),]
+  df<-df[(df$start>=min),]
+  df<-df[(df$end<=max),]
+  markers<-qtls_clusters[(qtls_clusters$Chromosome==chr),]
+  markers<-markers[(markers$marker_position>=min),]
+  markers<-markers[(markers$marker_position<=max),]
   
-  ggplot(Fg_final[(Fg_final$Chromosome==chr),], aes(x=end, y=density)) +
-    geom_jitter(size=1.6, aes(colour=Colour), alpha=0.6) +
+  ggplot(df, aes(x=end, y=density)) +
+    geom_jitter(size=3, aes(colour=Colour), alpha=0.6) +
     xlab("Position (bp)") + 
     ylab("Gene Density") + theme_bw() +
-    geom_hline(yintercept=0.7, alpha=0.7) +
     theme(text = element_text(size=16, colour="black")) +
     scale_color_manual( values=c("grey60", "orangered2")) +
-    # coord_cartesian(ylim=c(0,1), xlim=c(min, max))+
-    geom_vline(data =data, aes(xintercept=marker_position), colour="green")
+    # coord_cartesian(ylim=c(0,1), xlim=c(min, max))
+    geom_vline(data =markers, aes(xintercept=marker_position), colour="green")+
+    ggtitle(paste(chr))
 }
 
 # ====================================================================================================================
