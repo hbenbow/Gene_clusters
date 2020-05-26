@@ -123,4 +123,17 @@ for(marker in data$marker){
     ggtitle(paste(chr))
 }
 
+data = qtls_clusters[(qtls_clusters$Chromosome=="chr2D"),]
+data<-data[,c(14,15)]
+data<-data[!duplicated(data$marker),]
+ggplot(Fg_final[(Fg_final$Chromosome=="chr2D"),], aes(x=end, y=density)) +
+  geom_jitter(size=3, aes(colour=Colour), alpha=0.6) +
+  xlab("Position (bp)") + 
+  ylab("Gene Density") + theme_bw() +
+  theme(text = element_text(size=16, colour="black")) +
+  # scale_color_manual( values=c("grey60", "orangered2", )) +
+  # coord_cartesian(ylim=c(0,1), xlim=c(0, max(Fg_final[(Fg_final$Chromosome=="chr2D"),])))
+  geom_vline(data = data, aes(xintercept=marker_position, color = marker))+
+  ggtitle("Chromosome 2D")
+}
 # ====================================================================================================================
