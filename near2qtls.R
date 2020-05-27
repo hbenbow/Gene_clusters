@@ -82,7 +82,6 @@ for(qtl in qtls){
 qtls_clusters<-do.call(rbind.data.frame, qtls_clusters)
 qtls_clusters$Difference<-abs(as.numeric(qtls_clusters$start) - as.numeric(qtls_clusters$marker_position))/1000000
 
-venske_file<-QTL_database[,c(5,8)]
 
 # ====================================================================================================================
 # A histogram of distance between QTLs and FRGCs
