@@ -49,16 +49,17 @@ no_dups<-no_dups[!(duplicated(no_dups$ID)),]
 all_markers_positions_filtered<-no_dups
 write.csv(all_markers_positions_filtered, file="~/Documents/Hotspots/Paper_version_4/all_markers_positions_filtered.csv")
 
+qtl_indb_filtered<-subset(all_markers_positions_filtered, all_markers_positions_filtered$Feature %in% QTL_database$Linked.markers)
 
 # ========================================================================================================================================
 qtls_clusters<-list()
 all_qtls<-list()
 qtls<-QTL_database$General.number
 for(qtl in qtls){
-  data<-QTL_database[(QTL_database$General.number==qtl),]
-  marker<-data$Linked.markers
+  data2<-QTL_database[(QTL_database$General.number==qtl),]
+  marker<-data2$Linked.markers
   for(i in marker){
-    data<-data[(data$Linked.markers==i),]
+    data<-data2[(data2$Linked.markers==i),]
     chr<-data$Chromosomes
     position<-subset(all_markers_positions_filtered, all_markers_positions_filtered$Chromosome %in% chr)
     position<-subset(position, position$Feature %in% i)
@@ -72,16 +73,16 @@ for(qtl in qtls){
       clusters$marker_position<-paste(start)
       qtls_clusters[[length(qtls_clusters)+1]]<-clusters
     }
-    else{}
-    # clusters$marker_position<-as.numeric(paste(start))
-    # clusters$difference<-abs(clusters$start-clusters$marker_position)/1000000
-    # all_qtls[[length(all_qtls)+1]]<-clusters
   }
-} 
+  # clusters$marker_position<-as.numeric(paste(start))
+  # clusters$difference<-abs(clusters$start-clusters$marker_position)/1000000
+  # all_qtls[[length(all_qtls)+1]]<-clusters
+}
 
 qtls_clusters<-do.call(rbind.data.frame, qtls_clusters)
 qtls_clusters$Difference<-abs(as.numeric(qtls_clusters$start) - as.numeric(qtls_clusters$marker_position))/1000000
 
+venske_file<-QTL_database[,c(5,8)]
 
 # ====================================================================================================================
 # A histogram of distance between QTLs and FRGCs
