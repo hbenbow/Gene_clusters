@@ -81,7 +81,7 @@ for(qtl in qtls){
 
 qtls_clusters<-do.call(rbind.data.frame, qtls_clusters)
 qtls_clusters$Difference<-abs(as.numeric(qtls_clusters$start) - as.numeric(qtls_clusters$marker_position))/1000000
-
+write.csv(qtls_clusters, file="~/Documents/Hotspots/Paper_version_4/QTLs/qtls_and_clusters.csv")
 
 # ====================================================================================================================
 # A histogram of distance between QTLs and FRGCs
@@ -99,6 +99,7 @@ quantile(qtls_clusters$Difference, probs = c(0.01, 0.02, 0.05))
 threshold<-5
 data<-qtls_clusters[(qtls_clusters$Difference<=threshold),]
 write.csv(data, file="~/Documents/Hotspots/Paper_version_4/QTLs/qtls_lessthat_5mbp.csv")
+
 for(marker in data$marker){
   newdata<-data[(data$marker==marker),]
   min<-min(newdata$marker_position) - 5000000
