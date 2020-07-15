@@ -42,9 +42,9 @@ for(i in unique(final_hotspots$Hotspot)){
   pdf(paste(i, ".pdf"))
   heatmap.2(cor$r, margins=c(15,15), Rowv = NA, Colv = NA, symm=T, revC=F, RowSideColors=colors, ColSideColors = colors, dendrogram = "none", trace = "none", scale="none", col=my_palette)
   dev.off()
-  pdf(paste(i, "corr_plot.pdf"))
+  svg(paste(i, "corr_plot.svg"),width=cm(5), height=cm(5))
   corrplot(cor$r, type="lower", order="original",p.mat = cor$P, 
-          sig.level = 0.05, insig = "blank", tl.col="black", tl.cex = 0.7, tl.srt = 45)
+          sig.level = 0.05, insig = "blank", tl.col="black", tl.cex = 1.5, tl.srt = 45)
    dev.off()   
 }
   
